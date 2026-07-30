@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Notif Logger</string>
+    <string name="grant_notification_access">Grant Notification Access</string>
+    <string name="search_hint">Search notifications…</string>
+    <string name="sort_filter_export">Sort / Filter / Export</string>
+    <string name="sort_by">Sort by</string>
+    <string name="sort_latest_first">Latest first</string>
+    <string name="sort_oldest_first">Oldest first</string>
+    <string name="sort_app_name">App name (A–Z)</string>
+    <string name="sort_app_count">Most notifications first</string>
+    <string name="filter_by_app">Filter by app</string>
+    <string name="filter_by_date">Filter by date</string>
+    <string name="pick_date">Pick date</string>
+    <string name="clear_date">Clear date</string>
+    <string name="no_date_filter">No date filter applied</string>
+    <string name="apply">Apply</string>
+    <string name="clear_all_filters">Clear all filters</string>
+    <string name="export_to_text_file">Export to Text File</string>
+    <string name="all_apps">All apps</string>
+</resources>

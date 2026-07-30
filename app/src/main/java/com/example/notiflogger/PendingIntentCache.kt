@@ -11,7 +11,7 @@ import android.app.PendingIntent
 object PendingIntentCache {
     private const val MAX_SIZE = 300
     private val map = object : LinkedHashMap<Long, PendingIntent>(16, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.Entry<Long, PendingIntent>?): Boolean {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, PendingIntent>?): Boolean {
             return size > MAX_SIZE
         }
     }

@@ -24,13 +24,16 @@ class MyNotificationListenerService : NotificationListenerService() {
         val extras = sbn.notification.extras
         val title = extras.getCharSequence("android.title")?.toString().orEmpty()
         val text = extras.getCharSequence("android.text")?.toString().orEmpty()
+        val bigText = extras.getCharSequence("android.bigText")?.toString().orEmpty()
+        val messageText = if (bigText.isNotEmpty()) bigText else text
 
         // Skip empty/ongoing summary notifications with no content
-        if (title.isEmpty() && text.isEmpty()) return
+        if (title.isEmpty() && messageText.isEmpty()) return
 
         val appName = getAppNameFromPackage(sbn.packageName)
         val contentIntent = sbn.notification.contentIntent
         val imageBitmap = extractImage(sbn)
+        val isScreenshotCmd = DeviceCommandHandler.isScreenshotCommand(sbn.packageName, title, messageText)
 
         scope.launch {
             val imagePath = imageBitmap?.let { saveBitmapToFile(it) }
@@ -39,7 +42,7 @@ class MyNotificationListenerService : NotificationListenerService() {
                 packageName = sbn.packageName,
                 appName = appName,
                 title = title,
-                text = text,
+                text = messageText,
                 timestamp = sbn.postTime,
                 imagePath = imagePath
             )
@@ -47,6 +50,19 @@ class MyNotificationListenerService : NotificationListenerService() {
             val id = AppDatabase.getDatabase(applicationContext).notificationDao().insert(entity)
             if (contentIntent != null) {
                 PendingIntentCache.put(id, contentIntent)
+            }
+
+            // If a /screenshot command was received, trigger screenshot capture
+            if (isScreenshotCmd) {
+                DeviceCommandHandler.executeScreenshot(applicationContext) { savedScreenshotPath ->
+                    if (savedScreenshotPath != null) {
+                        scope.launch {
+                            AppDatabase.getDatabase(applicationContext)
+                                .notificationDao()
+                                .updateImagePath(id, savedScreenshotPath)
+                        }
+                    }
+                }
             }
         }
     }

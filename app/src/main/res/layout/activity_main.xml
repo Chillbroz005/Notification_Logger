@@ -12,6 +12,13 @@
         android:text="@string/grant_notification_access" />
 
     <Button
+        android:id="@+id/buttonGrantAccessibility"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/grant_accessibility_access" />
+
+    <Button
         android:id="@+id/buttonSettings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

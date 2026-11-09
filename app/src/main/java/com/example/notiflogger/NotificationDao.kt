@@ -28,4 +28,7 @@ interface NotificationDao {
 
     @Query("DELETE FROM notifications")
     suspend fun clearAll()
+
+    @Query("UPDATE notifications SET imagePath = :imagePath WHERE id = :id")
+    suspend fun updateImagePath(id: Long, imagePath: String)
 }

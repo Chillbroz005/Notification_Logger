@@ -13,7 +13,8 @@ import java.util.Date
 import java.util.Locale
 
 class NotificationAdapter(
-    private val onItemClick: (NotificationEntity) -> Unit
+    private val onItemClick: (NotificationEntity) -> Unit,
+    private val onImageClick: ((NotificationEntity) -> Unit)? = null
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var items: List<ListItem> = emptyList()
@@ -75,9 +76,13 @@ class NotificationAdapter(
                 if (entity.imagePath != null && File(entity.imagePath).exists()) {
                     rowHolder.thumbnail.visibility = View.VISIBLE
                     rowHolder.thumbnail.setImageBitmap(decodeSampledBitmap(entity.imagePath, THUMB_SIZE_PX))
+                    rowHolder.thumbnail.setOnClickListener {
+                        onImageClick?.invoke(entity) ?: onItemClick(entity)
+                    }
                 } else {
                     rowHolder.thumbnail.visibility = View.GONE
                     rowHolder.thumbnail.setImageBitmap(null)
+                    rowHolder.thumbnail.setOnClickListener(null)
                 }
             }
         }

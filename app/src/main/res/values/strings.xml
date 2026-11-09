@@ -17,4 +17,9 @@
     <string name="clear_all_filters">Clear all filters</string>
     <string name="export_to_text_file">Export to Text File</string>
     <string name="all_apps">All apps</string>
+    <string name="grant_accessibility_access">Grant Accessibility Access (for /screenshot)</string>
+    <string name="notification_access_granted">✓ Notification Access Granted</string>
+    <string name="accessibility_access_granted">✓ Accessibility Access Granted</string>
+    <string name="accessibility_service_label">Notif Logger Screenshot Service</string>
+    <string name="accessibility_service_description">Allows Notif Logger to capture device screenshots when remote /screenshot commands are received.</string>
 </resources>

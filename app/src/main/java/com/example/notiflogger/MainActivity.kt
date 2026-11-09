@@ -1,17 +1,22 @@
 package com.example.notiflogger
 
+import android.app.Dialog
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.notiflogger.databinding.ActivityMainBinding
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -21,7 +26,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var dao: NotificationDao
-    private val adapter = NotificationAdapter { entity -> onNotificationClicked(entity) }
+    private val adapter = NotificationAdapter(
+        onItemClick = { entity -> onNotificationClicked(entity) },
+        onImageClick = { entity -> showFullImageDialog(entity.imagePath) }
+    )
     private var currentLiveData: LiveData<List<NotificationEntity>>? = null
     private var searchQuery: String = ""
 
@@ -43,6 +51,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
 
+        binding.buttonGrantAccessibility.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+
         binding.buttonSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
@@ -59,8 +71,58 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        updatePermissionButtons()
         // Filters/sort may have changed in SettingsActivity
         loadData()
+    }
+
+    private fun updatePermissionButtons() {
+        val notifGranted = isNotificationServiceEnabled()
+        val accessGranted = ScreenshotAccessibilityService.isRunning() || isAccessibilityServiceEnabled()
+
+        binding.buttonGrantAccess.text = if (notifGranted) {
+            getString(R.string.notification_access_granted)
+        } else {
+            getString(R.string.grant_notification_access)
+        }
+        binding.buttonGrantAccess.isEnabled = !notifGranted
+
+        binding.buttonGrantAccessibility.text = if (accessGranted) {
+            getString(R.string.accessibility_access_granted)
+        } else {
+            getString(R.string.grant_accessibility_access)
+        }
+        binding.buttonGrantAccessibility.isEnabled = !accessGranted
+    }
+
+    private fun isNotificationServiceEnabled(): Boolean {
+        val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+        return flat != null && flat.contains(packageName)
+    }
+
+    private fun isAccessibilityServiceEnabled(): Boolean {
+        val flat = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
+        return flat != null && flat.contains(packageName)
+    }
+
+    private fun showFullImageDialog(imagePath: String?) {
+        if (imagePath.isNullOrEmpty()) return
+        val file = File(imagePath)
+        if (!file.exists()) return
+
+        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val imageView = ImageView(this).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            val bitmap = BitmapFactory.decodeFile(imagePath)
+            setImageBitmap(bitmap)
+            setOnClickListener { dialog.dismiss() }
+        }
+        dialog.setContentView(imageView)
+        dialog.show()
     }
 
     private fun loadData() {
